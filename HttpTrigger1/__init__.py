@@ -3,7 +3,7 @@ import json
 import logging
 import pymssql 
 import azure.functions as func
-import sys
+import sys, os.path
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
@@ -41,7 +41,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     #Listar todos
     if req.method=="GET" and req.route_params.get("param1")=="peliculas"  and req.route_params.get("param2")==None:
-        query="SELECT id, titulo, puntuacion FROM dbo.peliculas"
+        query="SELECT id, titulo, puntuacion FROM peliculas"
         result=read_query(query,cursor)
         respuesta=[]
         i=0
@@ -64,7 +64,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         if idpeli==None:
             return func.HttpResponse("Ingresa un ID valido",status_code=404)
         elif idpeli is not None:
-            query=f"SELECT id, titulo, puntuacion FROM dbo.peliculas WHERE id= '{idpeli}'"
+            query=f"SELECT id, titulo, puntuacion FROM peliculas WHERE id= '{idpeli}'"
             result=readOneQuery(query,cursor)
             if result==None:
                 return func.HttpResponse("ID no encontrado",status_code=404)
@@ -76,23 +76,23 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     #Borrar
     
     elif req.method=="DELETE" and req.route_params.get("param1")=="peliculas":
-        body=req.get_json()
-        logging.info(body)
-        idpeli=int(body.get('ID'))
-        query=f"SELECT id FROM dbo.peliculas WHERE id= '{idpeli}'"
+ 
+        
+        idpeli=req.route_params.get("param2")
+        query=f"SELECT id FROM peliculas WHERE id= '{idpeli}'"
         result=readOneQuery(query,cursor)
         if idpeli==None or result==None:
             return func.HttpResponse("ID no encontrado",status_code=404)
         elif idpeli is not None:
-            query=f"delete from dbo.peliculas where id='{idpeli}';"
+            query=f"delete from peliculas where id='{idpeli}';"
             result=post_query(query,cursor)
             return func.HttpResponse("Pelicula borrada",status_code=200)
     #Actualizar  
 
     elif req.method=="PUT" and req.route_params.get("param1")=="peliculas":
         body=req.get_json()
-        idpeli=(body.get('ID'))
-        query=f"SELECT id FROM dbo.peliculas WHERE id= '{idpeli}'"
+        idpeli=req.route_params.get("param2")
+        query=f"SELECT id FROM peliculas WHERE id= '{idpeli}'"
         result=readOneQuery(query,cursor)
         if idpeli==None or result==None:
             return func.HttpResponse("ID no encontrado",status_code=404)
@@ -106,6 +106,3 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     else:
         return func.HttpResponse(status_code=404)
         
-
-    
-#TODO: Al enviar un json erroneo truena la app
