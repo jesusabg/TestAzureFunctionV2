@@ -5,6 +5,7 @@ import pymssql
 import azure.functions as func
 import sys, os.path
 
+
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
     conn = pymssql.connect(server='serverapipython.database.windows.net', user='angular', password='Crud246476', database='apipython') 
@@ -57,7 +58,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         puntuacion=int(body.get('Puntuacion'))
         query=f"INSERT INTO peliculas (titulo, puntuacion) VALUES ('{titulo}', '{puntuacion}');"
         result=post_query(query,cursor)
-        return func.HttpResponse("Pelicula creada",status_code=200)
+        s1 = json.dumps({"message":"Pelicula creada"})
+        return func.HttpResponse(s1,status_code=200)
     #Obtener por id
     elif req.method=="GET" and req.route_params.get("param1")=="peliculas" :
         idpeli=req.route_params.get("param2")
@@ -86,7 +88,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         elif idpeli is not None:
             query=f"delete from peliculas where id='{idpeli}';"
             result=post_query(query,cursor)
-            return func.HttpResponse("Pelicula borrada",status_code=200)
+            s1 = json.dumps({"message":"Pelicula borrada"})
+            return func.HttpResponse(s1,status_code=200)
+            
     #Actualizar  
 
     elif req.method=="PUT" and req.route_params.get("param1")=="peliculas":
@@ -101,7 +105,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             puntuacion=int(body.get('Puntuacion'))
             query=f"UPDATE peliculas SET titulo = '{titulo}', puntuacion = '{puntuacion}' WHERE id='{idpeli}'; "
             result=post_query(query,cursor)
-            return func.HttpResponse("Pelicula actualizada",status_code=200)
+            s1 = json.dumps({"message":"Pelicula actualizada"})
+            return func.HttpResponse(s1,status_code=200)
+             
     
     else:
         return func.HttpResponse(status_code=404)
